@@ -478,6 +478,50 @@ def get_settings(update: Update, context: CallbackContext):
     else:
         send_settings(chat.id, user.id, True)
 
+@run_async
+def not_callback_data(update, context):
+    query = update.callback_query
+    bot = context.bot
+    uptime = get_readable_time((time.time() - StartTime))
+    if query.data == "cb_":
+        bot.answer_callback_query(query.id, text="Hey! Here's My About")
+        query.message.edit_text(
+        text=""" 😶"""
+        )
+    elif query.data == "cb_back":
+        first_name = update.effective_user.first_name
+        query.message.edit_text(
+                PM_START_TEXT.format(
+                    escape_markdown(first_name),
+                    escape_markdown(context.bot.first_name)),
+                parse_mode=ParseMode.MARKDOWN,
+                disable_web_page_preview=True,
+                reply_markup=InlineKeyboardMarkup(
+                    [[
+                        InlineKeyboardButton(
+                            text="☑️ Add Kurumi Chan to your group",
+                            url="t.me/{}?startgroup=true".format(
+                                context.bot.username))
+                    ],
+                     [
+                         InlineKeyboardButton(
+                             text="🚨 Support 🚨",
+                             url=f"https://t.me/{SUPPORT_CHAT}"),
+                         InlineKeyboardButton(
+                             text="My luv ❤",
+                             url="https://t.me/A_lonelyPerson")
+                    ], 
+                     [
+                         InlineKeyboardButton(
+                             text="🔔 Updates of KURUMI 🔔",
+                             url="https://t.me/hiroiscool")
+                    ], 
+                     [
+                         InlineKeyboardButton(
+                             text="📳 Anime Chat Group 📳",
+                             url="https://t.me/WeebXWorld")
+                    ]]))
+        
 
 @run_async
 def donate(update: Update, context: CallbackContext):
@@ -551,6 +595,7 @@ def main():
     settings_handler = CommandHandler("settings", get_settings)
     settings_callback_handler = CallbackQueryHandler(
         settings_button, pattern=r"stngs_")
+    not_callback_handler = CallbackQueryHandler( not_callback_data, pattern=r"cb_back")
 
     donate_handler = CommandHandler("donate", donate)
     migrate_handler = MessageHandler(Filters.status_update.migrate,
@@ -564,6 +609,7 @@ def main():
     dispatcher.add_handler(settings_callback_handler)
     dispatcher.add_handler(migrate_handler)
     dispatcher.add_handler(donate_handler)
+    dispatcher.add_handler(not_callback_handler)
 
     dispatcher.add_error_handler(error_callback)
 
